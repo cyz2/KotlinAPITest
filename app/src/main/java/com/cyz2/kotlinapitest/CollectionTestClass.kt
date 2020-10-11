@@ -4,26 +4,30 @@ class CollectionTestClass {
 
     // listOf创建一个 只读 列表集合，可以含有空值、重复值以及不同类型数据
     val listInt = listOf(1, 3, 0, 2, 9, 2, 5, 21, 4, 6)
+
     // listOf创建一个列表，可以含有空值和重复值
     val listOfNull = listOf("one", "two", null, "two", "three", null)
+
     //        listOfNull[0] = 3 // 编译错误，无法修改：No set method providing array access
     // listOfNotNull可以过滤元素中的空值
-    val listOfNotNull = listOfNotNull("one","two", null, "two", "three", null)
+    val listOfNotNull = listOfNotNull("one", "two", null, "two", "three", null)
 
     fun checkCollectionAPIs() {
         checkCollectionAPIsByList()
         checkListAPIs()
         checkListExtendAPIs()
         checkIterableAPIsByList()
-
-
+        checkMutableListAPIs()
+        checkSetAPIs()
+        checkMapAPIs()
+        checkTransform()
     }
 
     /**
      *  集合的公共行为
      *  以List为例，说明Collection相关接口
      */
-    fun checkCollectionAPIsByList(){
+    fun checkCollectionAPIsByList() {
         // size 集合大小
         println("listOfNull size is ${listOfNull.size}, listOfNotNull size is ${listOfNotNull.size}") // 6 4
         // isEmpty() 集合是否是空的
@@ -65,13 +69,13 @@ class CollectionTestClass {
     /**
      * List扩展函数
      * */
-    fun checkListExtendAPIs(){
+    fun checkListExtendAPIs() {
         // getOrNull() 获取索引位置的值，超出索引会返回null,在判空后调用get()
         println("listSub getOrNull index 7: ${listOfNotNull.getOrNull(7)}") // null
         // getOrElse() 获取索引位置的值，超出索引会返回表达式的值，在判空后调用get()
         println("listSub getOrElse index 7: ${listOfNotNull.getOrElse(7) { "unKnow" }}") // unKnow
         // elementAtXXX() 同上
-        println("listSub getOrElse index 7: ${listOfNotNull.elementAtOrNull(7) }") // null
+        println("listSub getOrElse index 7: ${listOfNotNull.elementAtOrNull(7)}") // null
         // slice() 获取指定索引范围内的子集合
         val listSince = listOfNotNull.slice(0..2)
         println("slice(0..2) size is ${listSince.size}: $listSince") // 3 [one, two, two]
@@ -138,7 +142,7 @@ class CollectionTestClass {
         // 输出：listInt + : [1, 3, 0, 2, 9, 2, 5, 2, 4, 6, one, two, two, three]
 
         //partition() 根据条件拆分成两个列表，返回Pair(first, second)
-        val (listEven,listOdd) = listInt.partition { it % 2 == 0 }
+        val (listEven, listOdd) = listInt.partition { it % 2 == 0 }
         println("After partition listOdd: $listOdd")    // [1, 3, 9, 5]
         println("After partition listEven: $listEven")  // [0, 2, 2, 2, 4, 6]
 
@@ -147,66 +151,119 @@ class CollectionTestClass {
         println("After zip listPair: $listPair")    // [(1, 0), (3, 2), (9, 2), (5, 2)]
 
         //unzip() 与zip的功能相反，将一个由pair组成的list分解成两个list
-        val (listOdd2,listEven2) = listPair.unzip()
+        val (listOdd2, listEven2) = listPair.unzip()
         println("After unzip listOdd2: $listOdd2")      // [1, 3, 9, 5]
         println("After unzip listEven2: $listEven2")    // [0, 2, 2, 2]
 
+        // 将集合分割成大小最大为size的多个小结合，返回返回List<List<T>>
+        println("After chunked 3: ${listInt.chunked(3)}") // [[1, 3, 0], [2, 9, 2], [5, 21, 4], [6]]
     }
 
-    fun checkMutableListAPI() {
-        //set.add;   set.remove;  set.clear ...跟java一样。（set集合不允许重复，java也是一样）
+    fun checkMutableCollectionAPIs(mutableList: MutableList<String?>) {
+        // 在指定位置添加元素，不指定则添加在末尾
+        mutableList.add("two")
+        mutableList.add(0, "two")
+        println("Mutablelist add : $mutableList")
+        // 在指定位置之后加入集合，不指定则添加在最后
+        mutableList.addAll(listOf("ten", "twenty", "thirty"))
+        println("Mutablelist after addAll : $mutableList")
+
+        // 删除第一个指定元素
+        mutableList.remove("two")
+        println("Mutablelist after remove : $mutableList")
+        // 删除指定位置的元素
+        mutableList.removeAt(5)
+        println("Mutablelist after remove index 5 : $mutableList")
+        // 删除指定集合中含有的元素
+        mutableList.removeAll(listOf(null, "twenty"))
+        println("Mutablelist after removeAll : $mutableList")
+        // 删除所有符合条件的元素
+        mutableList.removeIf { it.equals("two") }
+        println("Mutablelist after removeIf : $mutableList")
+
+        // 获取两个集合的合集
+        mutableList.retainAll(listOf("thousand", "hundred", "ten"))
+        println("Mutablelist retainAll : $mutableList")
+
+        // 清空集合
+        mutableList.clear()
+        println("Mutablelist clear : $mutableList")
     }
 
-    fun checkSetAPI() {
-        val set = setOf(1, 2, 3, 'a')
-    }
+    fun checkMutableListAPIs() {
+        // 只读集合和可变集合可以相互转换
+        val mutableList = listOfNull.toMutableList()
+        // Mutable集合可以修改
+        mutableList[2] = "six"
+        println("Mutablelist: $mutableList")
+        val tmp = mutableList.toList()
+//        tmp[0] = 2 // 编译错误：Not set method providing array access
 
-    fun checkMapAPI() {
+        // 替代某个位置的值
+        mutableList.set(1, "XXX")
+        println("Mutablelist set : $mutableList")
 
+        // 删除集合中第一个元素，如果有就返回元素，如果没有则抛出NoSuchElementException异常
+        println("Mutablelist after removeFirst:${mutableList.removeFirst()}: $mutableList")
+
+        /** removeFirst()相关函数还有 */
+//        mutableList.removeFirstOrNull()   // 集合是空的则返回Null，不抛异常
+//        mutableList.removeLast()
+//        mutableList.removeLastOrNull()
+
+        checkMutableCollectionAPIs(mutableList)
     }
 
     /**
-     * List 和 Set都实现自Collection接口，进而实现了Iterable接口的
-     * 而所有的Iterable都可以通过for遍历
+     * Set集合同样继承自Collection，由一串无序的、不能重复的元素构成。
+     * 和List的差别是，不能通过序号访问，不能有重复元素，
+     * 其他继承自Collection和Iterable的接口使用方式同List
      */
-    fun checkCollection() {
-        // List支持存入相同的值
-        val list = listOf("one", "two", "two", "three", "four")
-//        list.filter { "one" in it }
-        print("checkCollection list: ")
-//        listNumbers[0] = 3 // 编译错误，无法修改：No set method providing array access
-        // list支持索引遍历,[]是运算符重载, list[i] 是调用List的get方法;
-        for (i in 0 until list.size) {
-            print("${list[i]} ")
-        }
-        println()
-        // 输出：checkCollection list: one two two three four
-
+    fun checkSetAPIs() {
+        val set = setOf(1, 2, "three", 'a', null)
+        println("set: $set")  // set: b c a
         // set 不能存入重复元素
-        val set = setOf('b', 'c', 'a', 'a', 'b')
-        print("checkCollection set: ")
-        // set无法通过索引进行遍历
-        for (num in set) {
-            print("$num ")
-        }
-        println()
-        // 输出：checkCollection set: b c a
+        val setChar = setOf('b', 'c', 'a', 'a', 'b')
+        println("set: $setChar")  // set: b c a
+        // 相比于List，布置没有set方法，连get方法都没有
+//        setChar[0]  // 编译错误： Not get method providing array access
+        // 将集合分割成多个大小最多为size，返回List<List<T>>
+        println("set contain z: ${setChar.contains('z')}")  // false
+        setChar.contains('z')
+        // List转成Set，包括去重
+        val setFromList = listOfNull.toSet()
+        println("set: $setFromList")
+        checkMutableSet()
+    }
 
-        // List 和 Set可以相互转换
-        val list2Set = list.toSet()
-        print("list2set: ")
-        //利用foreach结合Lambda表达式遍历，所有继承自Iterable的类都可以使用foreach接口
-        list2Set.forEach { print("$it ") }
-        println()
-        val set2List = set.toList()
+    fun checkMutableSet() {
+        val mutableSet = mutableSetOf(9, 2, 3, 3, 3, 8, 3, 1, 2, 4, 0)
+        // 有add()和remove()接口
+        mutableSet.remove(9)
+        mutableSet.add(7)
+        println("MutableSet: $mutableSet")  // [2, 3, 8, 1, 4, 0, 7]
+        // HashSet，也是MutableSet
+        val hashset = hashSetOf(9, 2, 3, 3, 3, 8, 3, 1, 2, 4, 0)
+        println("HashSet Size ${hashset.size}:${hashset}") // 7:[0, 1, 2, 3, 4, 8, 9]
+        // LinkedHashSet，也是MutableSet
+        val linkedHashSet = linkedSetOf(9, 2, 3, 3, 3, 8, 3, 1, 2, 4, 0)
+        linkedHashSet.add(7)
+        linkedHashSet.remove(9)
+        println("LinkedHashSet :${linkedHashSet}")  // [2, 3, 8, 1, 4, 0, 7]
+        println("HashSet first ${hashset.first()}, LinkedHashSet first:${linkedHashSet.first()}") // 0, 2
+        // TreeSet
+        val sortSet = sortedSetOf(9, 2, 3, 3, 3, 8, 3, 1, 2, 4, 0)
+        println("sortSet:${sortSet}")  // [0, 1, 2, 3, 4, 8, 9]
+    }
 
+    fun checkMapAPIs() {
         // Map中同样的key存入不同的值，会被覆盖
-        val map = mapOf('a' to 'A', 'b' to 'B', 'a' to 'C')
+        val map = mapOf('d' to 'D', 'a' to 'C', 'b' to 'B', 'a' to 'A')
         println("Map size is ${map.size}")  // Map size is 2
 
         // 遍历Key，然后通过Key获得Value
         for (key in map.keys) {
-            print("$key = ${map[key]}; ")
+            print("$key = ${map[key]}, ")
         }
         println()
         //不同于List和Set，这个foreach是Map的扩展函数，内部也是使用for循环实现
@@ -216,33 +273,74 @@ class CollectionTestClass {
             print("$key = $value, ")
         }
         println()
-        // 输出： a = C, b = B,
+        // 输出： d = D, a = A, b = B,
 
-        // 可变集合和不可变集合可以相互转换：List、Set、Map都可以
-        val mutableList = list.toMutableList()
-        val list2 = mutableList.toList()
+        checkMutableMapAPIs()
 
+        val mutableMap = map.toMutableMap()
+    }
+
+    fun checkMutableMapAPIs() {
+        val mutableMap = mutableMapOf(1 to "one", 2 to "two", 3 to "Three")
+        println("MutableMap: $mutableMap") //{1=one, 2=two, 3=Three}
+        mutableMap.put(4, "four")
+        println("MutableMap: $mutableMap") // {1=one, 2=two, 3=Three, 4=four}
+        mutableMap.clear()
+        println("MutableMap: $mutableMap") // {}
+        //HashMap
+        val hashMap = hashMapOf('d' to 'D', 'a' to 'C', 'b' to 'B', 'a' to 'A')
+        println("HashMap: $hashMap")  // {a=A, b=B, d=D}
+        //SortedMap
+        val sortedMap = sortedMapOf('d' to 'D', 'a' to 'C', 'b' to 'B', 'a' to 'A')
+        println("SortedMap: $sortedMap")  // {a=A, b=B, d=D}
     }
 
     fun checkTransform() {
-        //list转Map
-//        val listAssociate = listOfNull.associate { it to it }
-//        println("list2Map: $listAssociate") //{1=1, 3=3, a=a, null=null, 34.5=34.5}
+        // 可变集合和不可变集合可以相互转换
+        val list = listOf("one", "two", "two", "three")
+        val mutableList = list.toMutableList()
+        val listBack = mutableList.toList()
+
+        val set = setOf('b', 'c', 'a', 'a', 'b')
+        val mutableSet = set.toMutableSet()
+        val setBack = mutableSet.toSet()
+
+        val map = mapOf(1 to "one", 2 to "two", 3 to "Three")
+        val mutableMap = map.toMutableMap()
+        val mapBack = mutableMap.toMap()
+
+        // List 转 Set，会去重
+        val list2Set = list.toSet()
+        val list2MutableSet = list.toMutableSet()
+        println("List size:${list.size}, list2Set size:${list2Set.size}")
+
+        // List/Set 转 Map，需要设置转换表达式
+        val list2Map = list.associate { it to it }
+        println("List to Map: $list2Map") // {one=one, two=two, three=three}
+
+        // Map 转 List
+        val map2List = map.toList()
+        println("Map to List: $map2List") // [(1, one), (2, two), (3, Three)]
+
+        // List/Set 可以和数组相互转换
+        // ...
+
+        /* 所有转换结果都是返回一个新的对象，对其操作不会对原始对象有影响 */
     }
 
 
-    fun checkUnknowAPIs(){
+    fun checkUnknowAPIs() {
         // maxOf() 获取符合表达式的最大值
         // Returns the largest value among all values produced by [selector] function
         //
         val maxOf = listInt.maxOf { it > 5 }
         println("maxOf : $maxOf")
         // maxByOrNull()  Returns the first element yielding the largest value of the given function or `null` if there are no elements.
-        val maxByOrNull = listInt.maxByOrNull { it >5}
+        val maxByOrNull = listInt.maxByOrNull { it > 5 }
         println("maxByOrNull : $maxByOrNull")
         //  * Returns the largest value among all values produced by [selector] function
         // * applied to each element in the collection or `null` if there are no elements.
-        val maxOfOrNull = listInt. maxOfOrNull{ it >10}
+        val maxOfOrNull = listInt.maxOfOrNull { it > 10 }
         println("maxOfOrNull : $maxOfOrNull")
 
 
