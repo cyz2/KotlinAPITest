@@ -19,7 +19,7 @@ class MainActivity : AppCompatActivity() {
                     .setAction("Action", null).show()
         }
 
-//        ArrayTestClass().checkArrays()
+        ArrayTestClass().checkArrays()
         CollectionTestClass().checkCollectionAPIs()
     }
 

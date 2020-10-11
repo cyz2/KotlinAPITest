@@ -21,6 +21,7 @@ class CollectionTestClass {
         checkSetAPIs()
         checkMapAPIs()
         checkTransform()
+        checkNewFuns()
     }
 
     /**
@@ -309,10 +310,14 @@ class CollectionTestClass {
         val mutableMap = map.toMutableMap()
         val mapBack = mutableMap.toMap()
 
-        // List 转 Set，会去重
+        // List 转 Set/MutableSet，会去重
         val list2Set = list.toSet()
         val list2MutableSet = list.toMutableSet()
         println("List size:${list.size}, list2Set size:${list2Set.size}")
+
+        // Set 转 List/MutableList
+        val set2List = set.toList()
+        val set2MutableList = set.toMutableList()
 
         // List/Set 转 Map，需要设置转换表达式
         val list2Map = list.associate { it to it }
@@ -323,9 +328,108 @@ class CollectionTestClass {
         println("Map to List: $map2List") // [(1, one), (2, two), (3, Three)]
 
         // List/Set 可以和数组相互转换
-        // ...
+        var array: Array<String>
+        array = list.toTypedArray()
+        print("List to Array：")
+        for (index in array.indices) {
+            print("${array[index]} \t")     // one  two  two  three
+        }
+        println()
+        array = list2Set.toTypedArray()
+        print("Set to Array: ")
+        for (index in array.indices) {
+            print("${array[index]} \t")     // one 	 two 	three
+        }
+        println()
 
         /* 所有转换结果都是返回一个新的对象，对其操作不会对原始对象有影响 */
+    }
+
+    fun checkNewFuns() {
+        checkFunMap()
+        checkFunFlatMap()
+        checkSequence()
+        checkUnknowAPIs()
+    }
+
+    fun checkFunMap() {
+        /**
+         * map()
+         * 根据表达式对每个元素进行一一转换，返回结果集
+         * */
+        val listString: List<String> = listOf("1", "2", "3", "a", "yes")
+        // 使用匿名函数
+        val trans = fun(str: String): Int = str.toIntOrNull() ?: 0
+        val listInt: List<Int> = listString.map(trans)
+        //使用Lambda表达式
+        val listInt2: List<Int> = listString.map {
+            it.toIntOrNull() ?: 0
+        }
+        println(listInt)    // [1, 2, 3, 0, 0]
+        println(listInt2)   // [1, 2, 3, 0, 0]
+    }
+
+    fun checkFunFlatMap() {
+        /**
+         * flatMap()
+         * 将几个小列表合成一个单一列表
+         * */
+        // 把一个二级列表变换成一个一级列表
+        val list = listOf(listOf(1, 2), listOf(2, 3, 4), listOf(5))
+        val listSingle = list.flatMap { it }
+        // 同上
+        val listSingle2 = list.flatten()
+        println(listSingle) // [1, 2, 2, 3, 4, 5]
+
+        val groups = listOf(
+            Group("Group1", listOf("item11", "item12")),
+            Group("Group2", listOf("item21", "item22")),
+            Group("Group3", listOf("item31", "item32", "item33"))
+        )
+        // 将一个复杂对象拆分成多个独立列表
+        val listTitle = groups.flatMap { listOf(it.title) }
+        println("Title List : $listTitle") // [Group1, Group2, Group3]
+        val listData = groups.flatMap { it.data }
+        println("Data List : $listData")    // [item11, item12, item21, item22, item31, item32, item33]
+    }
+
+    class Group(val title: String, val data: List<String>)
+
+
+    fun checkSequence() {
+        val list = listOf(1, 2, 3, 4, 5, 6)
+        // 列表元素转换并条件过滤
+        val result = list
+            .map {
+                println("map: $it")
+                it * 2
+            }
+            .filter {
+                println("filter: $it")
+                it % 3 == 0
+            }
+        println("Before get List Average")
+        // 求结果集合的平均值
+        println("Average is ${result.average()}")
+
+        val resultAsSequence = list
+            .asSequence()
+            .map {
+                println("map: $it")
+                it * 2
+            }
+            .filter {
+                println("filter: $it")
+                it % 3 == 0
+            }
+        println("Before get Sequence Average ")
+        // 求结果集合的平均值
+        println("ListAsSequence Average is ${resultAsSequence.average()}")
+
+
+        // 求结果集合的平均值
+        println("First elem >3 in List is ${result.first { it >3 }}")
+        println("First elem >3 in Sequence is ${resultAsSequence.first { it >3 }}")
     }
 
 
