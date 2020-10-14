@@ -1,6 +1,4 @@
-package com.cyz2.kotlinapitest
-
-import kotlinx.coroutines.channels.consumesAll
+package com.cyz2.kotlinapitest.api
 
 class FunTest {
     fun sum(para1: Int, para2: Int) = para1 + para2

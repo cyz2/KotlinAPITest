@@ -1,4 +1,4 @@
-package com.cyz2.kotlinapitest
+package com.cyz2.kotlinapitest.api
 
 import kotlinx.coroutines.*
 import java.lang.Math.random

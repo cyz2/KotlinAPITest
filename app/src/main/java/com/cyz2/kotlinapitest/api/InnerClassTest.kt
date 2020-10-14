@@ -1,4 +1,4 @@
-package com.cyz2.kotlinapitest
+package com.cyz2.kotlinapitest.api
 
 class InnerClassTest {
 
@@ -40,17 +40,17 @@ class Data private constructor(id:String,num:Int){
         private lateinit var id:String
         private var num:Int = 0
 
-        fun id(id:String):Builder{
+        fun id(id:String): Builder {
             this.id = id
             return this
         }
 
-        fun num(num:Int):Builder{
+        fun num(num:Int): Builder {
             this.num = num
             return this
         }
 
-        fun build():Data{
+        fun build(): Data {
             return Data(id,num)
         }
     }

@@ -1,4 +1,4 @@
-package com.cyz2.kotlinapitest
+package com.cyz2.kotlinapitest.api
 
 //基础数据类型扩展
 fun Double.interestBy(rate: Double): Double {

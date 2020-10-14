@@ -1,4 +1,4 @@
-package com.cyz2.kotlinapitest
+package com.cyz2.kotlinapitest.api
 
 //class ObjectTest {
 //    fun test() {
@@ -17,17 +17,17 @@ class Person private constructor(val gender: String) {
     companion object Common {
         const val MALE = "male"
         const val FEMALE = "female"
-        fun getMale(person:Person): String {
+        fun getMale(person: Person): String {
             return person.gender
         }
-        fun createPerson(gender:String):Person{
+        fun createPerson(gender:String): Person {
             return Person(gender)
         }
     }
 }
 
 val personGender1 = Person.FEMALE // 可以通过类名直接访问
-val personGender2 = Person.Common.MALE// 也可以通过类名和伴生对象的名字访问
+val personGender2 = Person.MALE// 也可以通过类名和伴生对象的名字访问
 val person3 = Person.createPerson(Person.MALE)
 
 interface DAOInterface {
@@ -70,7 +70,7 @@ class Singleton private constructor(){ // 私有化构造函数
     }
     companion object{
         // 静态成员获取单例对象
-        fun getInstance():Singleton{
+        fun getInstance(): Singleton {
             return Inner.INSTANCE
         }
     }

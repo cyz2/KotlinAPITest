@@ -1,4 +1,4 @@
-package com.cyz2.kotlinapitest
+package com.cyz2.kotlinapitest.api
 
 import android.view.View
 
@@ -25,5 +25,5 @@ sealed class UiOp {
     class TranslateY(val px: Float): UiOp()
 }
 //其子类可以定在密封类外部，但是必须在同一文件中 v1.1之前只能定义在密封类内部
-data class ViewVis(val vis:Int):UiOp()
-object NotAOp:UiOp()
+data class ViewVis(val vis:Int): UiOp()
+object NotAOp: UiOp()
